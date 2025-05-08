@@ -5,6 +5,9 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 
+// 导入文章路由模块
+const postRoutes = require("./routes/postRoutes");
+
 // 2. 创建 Express 应用实例
 const app = express();
 
@@ -14,10 +17,20 @@ const PORT = process.env.PORT || 3001;
 // 获取数据库连接 URI
 const MONGODB_URI = process.env.MONGODB_URI;
 
-// 4. 定义一个简单的路由处理器
+// 中间件 (Middleware)
+// 使用 express.json() 中间件来解析 JSON 格式的请求体
+app.use(express.json());
+// (可选) 解析 URL 编码的请求体 (通常用于 HTML 表单提交)
+// app.use(express.urlencoded({ extended: true }));
+
+// 路由 (Routes)
+// 将 /api/posts 路径下的所有请求都交给 postRoutes 来处理
+app.use("/api/posts", postRoutes);
+
+// 4. 定义一个简单的根路径路由处理器 (用于测试服务器是否运行)
 app.get("/", (req, res) => {
   res.send(
-    "Hello from Express Server! Now with MongoDB connection (hopefully)."
+    "Hello from Express Server! Now with MongoDB connection and post routes configured."
   );
 });
 
@@ -33,6 +46,5 @@ mongoose
   })
   .catch((error) => {
     console.error("Error connecting to MongoDB Atlas:", error.message);
-    // 如果数据库连接失败，可以选择不启动服务器或进行其他处理
-    process.exit(1); // 退出进程，表示启动失败
+    process.exit(1);
   });
